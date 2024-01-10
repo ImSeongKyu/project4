@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace = "dev.mvc.themember.TheMemberDAOInter">
+  <select id="the_checkID" resultType="int" parameterType="String">
+    SELECT COUNT(id) as cnt
+    FROM themember
+    WHERE id=#{id}
+  </select>
+  <insert id="the_create" parameterType="dev.mvc.themember.TheMemberVO">
+    INSERT INTO themember(thememberno, id, passwd, mname, tel, zipcode, address1, address2, mdate, grade)
+    VALUES (themember_seq.nextval, #{id}, #{passwd}, #{mname}, #{tel}, #{zipcode}, 
+                 #{address1}, #{address2}, sysdate, #{grade})
+  </insert>
+
+  <select id="the_list" resultType="dev.mvc.themember.TheMemberVO">
+    SELECT thememberno, id, passwd, mname, tel, zipcode, address1, address2, mdate, grade
+    FROM themember
+    ORDER BY grade ASC, id ASC
+  </select>
+  
+  <!-- memberno로 회원 정보 조회 -->
+  <select id="the_read" resultType="dev.mvc.themember.TheMemberVO" parameterType="int">
+    SELECT thememberno, id, passwd, mname, tel, zipcode, address1, address2, mdate, grade
+    FROM themember
+    WHERE thememberno = #{thememberno}
+  </select>  
+
+  <!-- id(이메일)로 회원 정보 조회 -->
+  <select id="the_readById" resultType="dev.mvc.themember.TheMemberVO" parameterType="String">
+    SELECT thememberno, id, passwd, mname, tel, zipcode, address1, address2, mdate, grade
+    FROM themember
+    WHERE id = #{id}
+  </select>  
+  
+    <update id="the_update" parameterType="dev.mvc.themember.TheMemberVO">
+    UPDATE themember 
+    SET id=#{id}, mname=#{mname}, tel=#{tel}, zipcode=#{zipcode}, address1=#{address1}, address2=#{address2}
+    WHERE thememberno=#{thememberno}
+  </update>
+  
+  <delete id="the_delete" parameterType="int">
+    DELETE FROM themember
+    WHERE thememberno=#{thememberno}
+  </delete>
+  
+    <!-- 로그인 -->
+  <select id="login" resultType="int" parameterType="HashMap">
+    SELECT COUNT(thememberno) as cnt
+    FROM themember
+    WHERE id=#{id} AND passwd=#{passwd}
+  </select>
+  
+    <!--  현재 패스워드 검사 -->
+  <select id="the_passwd_check" parameterType="HashMap" resultType="int">
+    SELECT COUNT(thememberno) as cnt
+    FROM themember
+    WHERE thememberno=#{thememberno} AND passwd=#{passwd}
+  </select>
+  
+  <!-- 패스워드 변경 -->
+  <update id="the_passwd_update" parameterType="HashMap">
+    UPDATE themember
+    SET passwd=#{passwd}
+    WHERE thememberno=#{thememberno}
+  </update>
+ 
+     
+</mapper> 
+
+

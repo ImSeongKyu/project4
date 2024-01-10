@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="dev.mvc.overcontents.OverContentsDAOInter">
+  <!-- 등록한 레코드 갯수 1 리턴 -->
+  <!-- 이름 = create, 전달받는 데이터 타입 = dev.mvc.contents.ContentsVO -->
+  <!-- #{}안에 있는 요소에 따라 parameterType에 명시된 -->
+  <!-- ContentsVO에 있는 getter메소드가 호출되어 값이 해당 위치에 들어감 -->
+  <insert id="over_create" parameterType="dev.mvc.overcontents.OverContentsVO">
+    INSERT INTO overcontents(overcontentsno, msadminno, catenum, title, content, passwd, 
+                         word, file1, file1saved, thumb1, size1, rdate)
+    VALUES(overcontents_seq.nextval, #{msadminno}, #{catenum}, #{title}, #{content}, #{passwd}, #{word},
+                    #{file1}, #{file1saved}, #{thumb1}, #{size1}, sysdate)
+    
+  </insert>
+
+      <!-- 모든 카테고리의 등록된 글목록 -->
+  <select id="over_list_all" resultType="dev.mvc.overcontents.OverContentsVO">
+    SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, passwd, word, rdate,
+               file1, file1saved, thumb1, size1
+    FROM overcontents
+    ORDER BY overcontentsno DESC
+  </select> 
+  
+  
+  <!-- 특정 카테고리의 등록된 글목록 -->
+  <select id="over_list_by_cateno" resultType="dev.mvc.overcontents.OverContentsVO" parameterType="int">
+    SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, rdate,
+              file1, file1saved, thumb1, size1
+    FROM overcontents 
+    WHERE catenum = #{catenum}
+    ORDER BY overcontentsno DESC
+  </select> 
+  
+  <!-- 일반적인 조회 -->
+  <select id="over_read" resultType="dev.mvc.overcontents.OverContentsVO" parameterType="int">
+    SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, passwd, word, rdate,
+              file1, file1saved, thumb1, size1, map, youtube
+    FROM overcontents
+    WHERE overcontentsno = #{overcontentsno}
+  </select>
+  
+  <!-- map 등록, 수정, 삭제, 
+         HashMap: VO 클래스는 변수가 너무 많아서 메모리 낭비가 발생함으로,
+                       보통 3개 이하의 적은 변수만 전달하는 경우 HashMap 사용 권장 -->
+  <update id="map" parameterType="HashMap">
+    UPDATE overcontents SET map=#{map} WHERE overcontentsno=#{overcontentsno}
+  </update>
+
+  <!-- Youtube 등록, 수정, 삭제, 
+         HashMap: VO 클래스는 변수가 너무 많아서 메모리 낭비가 발생함으로,
+                       보통 3개 이하의 적은 변수만 전달하는 경우 HashMap 사용 권장 -->
+  <update id="youtube" parameterType="HashMap">
+    UPDATE overcontents SET youtube=#{youtube} WHERE overcontentsno=#{overcontentsno}
+  </update>
+    
+      <!-- 카테고리별 검색 목록 -->
+  <select id="over_list_by_cateno_search" resultType="dev.mvc.overcontents.OverContentsVO" parameterType="HashMap">
+    SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, word, rdate,
+            file1, file1saved, thumb1, size1, map, youtube
+    FROM overcontents
+    <choose>
+      <when test="word == null or word == ''"> <!-- 검색하지 않는 경우 -->
+        WHERE catenum=#{catenum}
+      </when>
+      <otherwise> <!-- 검색하는 경우 -->
+        WHERE catenum=#{catenum} AND (UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                                  OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%' 
+                                                  OR UPPER(word) LIKE '%' || UPPER(#{word}) || '%') 
+
+      </otherwise>
+    </choose>
+                                                 <if test="type1 != null and type1 != '' ">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type1}) || '%') 
+                                                  </if>
+                                                  <if test="type2 != null and type2 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type2}) || '%') 
+                                                  </if>
+                                                  <if test="type3 != null and type3 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type3}) || '%') 
+                                                  </if>
+    ORDER BY overcontentsno DESC   
+  </select>
+   
+  <!-- 카테고리별 검색 레코드 갯수 -->
+  <select id="over_search_count" resultType="int" parameterType="HashMap">
+    SELECT COUNT(*) as cnt
+    FROM overcontents
+    <choose>
+      <when test="word == null or word == ''"> <!-- 검색하지 않는 경우의 레코드 갯수 -->
+        WHERE catenum=#{catenum}
+      </when>
+      <otherwise> <!-- 검색하는 경우의 레코드 갯수 -->
+        WHERE catenum=#{catenum} AND (UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                                  OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%' 
+                                                  OR UPPER(word) LIKE '%' || UPPER(#{word}) || '%')
+      </otherwise>
+    </choose>
+    
+                                                  <if test="type1 != null and type1 != '' ">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type1}) || '%') 
+                                                  </if>
+                                                  <if test="type2 != null and type2 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type2}) || '%') 
+                                                  </if>
+                                                  <if test="type3 != null and type3 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type3}) || '%') 
+                                                  </if>
+  </select>   
+    
+
+  <!-- 카테고리별 검색 + 페이징 목록 -->
+  <select id="over_list_by_cateno_search_paging" resultType="dev.mvc.overcontents.OverContentsVO" parameterType="dev.mvc.overcontents.OverContentsVO">
+   SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, rdate, file1, file1saved, thumb1, size1, map, youtube, r
+   FROM (
+              SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, rdate, file1, file1saved, thumb1, size1, map, youtube, rownum as r
+              FROM (
+                        SELECT overcontentsno, msadminno, catenum, title, content, recom, cnt, replycnt, rdate, file1, file1saved, thumb1, size1, map, youtube
+                        FROM overcontents
+                        <choose>
+                          <when test="word == null or word == ''"> <!-- 검색하지 않는 경우 -->
+                            WHERE catenum=#{catenum}
+                          </when>
+                          <otherwise>
+                            WHERE catenum=#{catenum} AND (UPPER(title) LIKE '%' || UPPER(#{word}) || '%' 
+                                                              OR UPPER(content) LIKE '%' || UPPER(#{word}) || '%' 
+                                                              OR UPPER(word) LIKE '%' || UPPER(#{word}) || '%')
+                          </otherwise>
+                        </choose>
+                                                  <if test="type1 != null and type1 != '' ">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type1}) || '%') 
+                                                  </if>
+                                                  <if test="type2 != null and type2 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type2}) || '%') 
+                                                  </if>
+                                                  <if test="type3 != null and type3 != ''">
+                                                        AND (UPPER(word) LIKE '%' || UPPER(#{type3}) || '%') 
+                                                  </if>
+                        ORDER BY overcontentsno DESC
+               )
+    )
+    WHERE <![CDATA[ r >= #{start_num} AND r <= #{end_num} ]]>
+     
+    <!-- 1 page: WHERE r >= 1 AND r <= 10; 
+          2 page: WHERE r >= 11 AND r <= 20;
+          3 page: WHERE r >= 21 AND r <= 30; -->
+  </select>
+  
+    <!-- 패스워드 검사 -->
+  <select id="over_password_check" resultType="int" parameterType="HashMap">
+    SELECT COUNT(*) as cnt 
+    FROM overcontents
+    WHERE overcontentsno = #{overcontentsno} AND passwd=#{passwd}
+  </select>
+  
+  <!-- 글 수정 -->
+  <update id="over_update_text" parameterType="dev.mvc.overcontents.OverContentsVO">
+    UPDATE overcontents
+    SET title=#{title}, content=#{content},  word=#{word}
+    WHERE overcontentsno = #{overcontentsno}
+  </update>
+
+
+  <!-- 파일 수정 -->
+  <update id="over_update_file" parameterType="dev.mvc.overcontents.OverContentsVO">
+    UPDATE overcontents
+    SET file1=#{file1}, file1saved=#{file1saved}, thumb1=#{thumb1}, size1=#{size1}
+    WHERE overcontentsno = #{overcontentsno}
+  </update>  
+         
+  <delete id="over_delete" parameterType="int">
+    DELETE FROM overcontents
+    WHERE overcontentsno = #{overcontentsno}
+  </delete>
+  
+      <!-- 특정 카테고리에 속한 레코드 갯수를 리턴 -->
+  <select id="over_count_by_cateno" resultType="int" parameterType="int">
+    SELECT COUNT(*) as cnt 
+    FROM overcontents 
+    WHERE catenum=#{catenum}
+  </select>
+  
+  <!-- 특정 카테고리에 속한 모든 레코드 삭제 -->
+  <delete id="over_delete_by_cateno" parameterType="int">
+    DELETE FROM overcontents
+    WHERE catenum=#{catenum}
+  </delete>
+  
+  <!-- 조회수(cnt) 추가 -->
+  <update id="over_cnt_up" parameterType="int">
+    UPDATE overcontents SET cnt=cnt+1 WHERE overcontentsno=#{overcontentsno}
+  </update>
+  
+</mapper> 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="dev.mvc.reply.ReplyDAOInter">
+    <!-- 댓글 삽입 -->
+  <insert id="reply_create" parameterType="dev.mvc.reply.ReplyVO">
+      INSERT INTO reply(replyno, overcontentsno, thememberno, replyword, chu, rdate)
+      VALUES(reply_seq.nextval, #{overcontentsno}, #{thememberno}, #{replyword}, 0, sysdate)
+    
+  </insert>
+  
+  <!-- 해당 컨텐츠에 등록된 모든 댓글, 추천 여부 조회-->
+  <select id="reply_all" resultType="dev.mvc.reply.ReplyVO" parameterType="int">
+    SELECT replyno, overcontentsno, thememberno, replyword, chu, rdate
+    FROM reply
+    WHERE overcontentsno=#{overcontentsno}
+  </select>
+  
+  <!-- 추천함 -->
+  <update id="reply_cnt_yes" parameterType="dev.mvc.reply.ReplyVO">
+    UPDATE reply SET chu=1 WHERE overcontentsno=#{overcontentsno} AND thememberno=#{thememberno}
+  </update>
+  
+  <!-- 추천 안함 -->
+  <update id="reply_cnt_no" parameterType="dev.mvc.reply.ReplyVO">
+    UPDATE reply SET chu=0 WHERE overcontentsno=#{overcontentsno} AND thememberno=#{thememberno}
+  </update>
+  
+</mapper>

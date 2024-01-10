@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="dev.mvc.msadmin.MsAdminDAOInter">
+  <!-- 로그인 -->
+  <select id="ms_login" resultType="int" parameterType="dev.mvc.msadmin.MsAdminVO">
+    SELECT COUNT(*) as cnt
+    FROM msadmin
+    WHERE id=#{id} AND passwd=#{passwd} 
+  </select>
+  
+  <!-- 관리자 정보 -->
+  <select id="ms_read_by_id" resultType="dev.mvc.msadmin.MsAdminVO" parameterType ="String" >
+    SELECT msadminno, id, passwd, mname, mdate, grade 
+    FROM msadmin
+    WHERE id=#{id}
+  </select>
+  
+  <!-- adminno를 통한 회원 정보 -->
+  <select id="ms_read" resultType="dev.mvc.msadmin.MsAdminVO" parameterType ="int" >
+    SELECT msadminno, id, passwd, mname, mdate, grade 
+    FROM msadmin
+    WHERE msadminno=#{msadminno}
+  </select>
+  
+</mapper>

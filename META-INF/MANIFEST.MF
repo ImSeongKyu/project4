@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Main-Class: dev.mvc.project1.Project1Application

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mybatis는 mysql을 편리하게 실행할 수 있으나 이를 호출하여 결과를 도출하는 등의 기능을 추가로 구현해야 함-->
+ <!-- 그렇기에 src/main/java내부에서 이를 실행할 수 있는 추가 코드들이 필요함. -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- DBMS관련 자동 연결 및 해제 -->
+<!-- 자식 XML 태그들은 dev.mvc.cate.CateDAOInter.java interface와 연결됨 -->
+<!-- 해당 코드를 테스트하는 곳은 src/test/java/dev.mvc.resort_v1sbm3c 내의 java코드 -->
+
+<mapper namespace="dev.mvc.procate.ProCateDAOInter">
+    <!--  insert : INSERT SQL 명령문 실행, parameterType : 전달받는 데이터, return : 등록된 레코드 갯수 1을 리턴 -->
+    <!-- id='create'는 태그를 고유하게 구분, 메소드명으로 사용됨 -->
+    <!-- parameterType의 CateVO는 INSERT태그가 전달받는 데이터 타입이 명시된 java파일을 의미한다. -->
+    <!--  #{ name }은  proCateVO class의 getName()의 리턴값이 대입됨 -->
+    <insert id="cate_create" parameterType="dev.mvc.procate.ProCateVO">
+        INSERT INTO procate(catenum, seqno, name, cnt, rdate) VALUES(autocate_seq.nextval, autocate_seq.nextval, #{name}, 0, sysdate)
+    </insert>
+    
+    <!-- 전체 목록 조회 -->
+    <!-- select 자체가 ArrayList<> 타입의 값을 리턴하며 -->
+    <!-- 이때 resultType(여기서는 proCateVO)이 뭐냐에 따라 ArrayList<>의 타입이 결정됨 -->
+<!--     <select id="cate_list" resultType="dev.mvc.procate.ProCateVO">
+        SELECT catenum, name, cnt, rdate FROM procate ORDER BY catenum ASC
+    </select>  -->
+    
+    <!-- 출력 우선순위 적용 + 출력 모드 적용 -->
+    <select id="cate_list" resultType="dev.mvc.procate.ProCateVO">
+        SELECT catenum, name, cnt, rdate, seqno, visible FROM procate ORDER BY seqno ASC
+    </select> 
+    
+      <!-- 비회원/회원 SELECT LIST -->
+  <select id="cate_list_all_y" resultType="dev.mvc.procate.ProCateVO">
+    SELECT catenum, name, cnt, rdate, seqno, visible 
+    FROM procate 
+    WHERE visible='Y'
+    ORDER BY seqno ASC
+  </select>
+    
+    <!-- 읽기 SQL -> proCateVO return -->
+    <select id="cate_read" resultType="dev.mvc.procate.ProCateVO" parameterType="int">
+        SELECT catenum, name, cnt, rdate, explain FROM procate WHERE catenum=#{catenum}
+    </select> 
+    
+    <!-- 수정 -->
+    <!-- 수정할 레코드 갯수를 1 리턴, parameterType=수정할 레코드 정보 -->
+    <update id="cate_update" parameterType="dev.mvc.procate.ProCateVO">
+        UPDATE procate SET name=#{name}, cnt=#{cnt}, explain=#{explain} WHERE catenum=#{catenum}
+    </update>
+    <!-- 삭제 -->
+    <!-- return : 삭제한 레코드 갯수 리턴, ParameterType = 삭제할 레코드 정보 -->
+    <delete id="cate_delete" parameterType="int">
+        DELETE FROM procate WHERE catenum=#{catenum}
+    </delete>
+    
+  <!-- 우선 순위 높임, 10 등 -> 1 등 -->
+  <update id="cate_update_seqno_forward" parameterType="int">
+    UPDATE procate SET seqno = seqno - 1 WHERE catenum=#{catenum}
+  </update>
+
+  <!-- 우선 순위 낮춤, 1 등 -> 10 등 -->
+  <update id="cate_update_seqno_backward" parameterType="int">
+    UPDATE procate SET seqno = seqno + 1 WHERE catenum=#{catenum}
+  </update>
+  
+  <!-- 카테고리 공개 설정 -->
+  <update id="cate_update_visible_y" parameterType="int">
+    UPDATE procate SET visible='Y' WHERE catenum=#{catenum}
+  </update>
+  
+  <!-- 카테고리 비공개 설정 -->
+  <update id="cate_update_visible_n" parameterType="int">
+    UPDATE procate SET visible='N' WHERE catenum=#{catenum}
+  </update>
+  
+    <!-- 카테고리 총량(cnt) 추가 -->
+  <update id="cate_update_cnt_up" parameterType="int">
+    UPDATE procate SET cnt=cnt+1 WHERE catenum=#{catenum}
+  </update>
+  
+  <!-- 카테고리 총량(cnt) 감소 -->
+  <update id="cate_update_cnt_down" parameterType="int">
+    UPDATE procate SET cnt=cnt-1 WHERE catenum=#{catenum}
+  </update>
+      
+    
+</mapper>
